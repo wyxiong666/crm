@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <div class="addBox">
+       <div>
+           <label for="username">姓名:</label>
+           <input type="text" name="name" id="username">
+       </div>
+        <div>
+            <label for="userTel">电话:</label>
+            <input type="tel" name="tel" id="userTel">
+        </div>
+        <div>
+            <input type="button" value="提交" id="btn">
+        </div>
+    </div>
+</body>
+</html>
+<script src="js/ajax.js"></script>
+<script>
+    //新增客户信息 url: /addInfo
+    let username=document.getElementById("username"),
+        userTel=document.getElementById("userTel"),
+        btn=document.getElementById("btn");
+
+    //处理修改的逻辑
+    function query(url){
+        let obj = {}
+        let reg = /([^?&=#]+)=([^?&=#]+)/g;
+        url.replace(reg,function($0,$1,$2){
+            obj[$1]=$2;
+        })
+        return obj;
+    }
+
+    //通过id值获取要修改的数据
+    let url = window.location.href;
+    let customId = query(url).id;
+    if(customId){
+        ajax({
+            type:"get",
+            url :"/getList",
+            data:{id:customId},
+            dataType:"json",
+            success(result){
+                if(result.code==0){
+                    let data = result.data;
+                    username.value = data.name;
+                    userTel.value = data.tel;
+                }
+            }
+        })
+    }
+
+    btn.onclick=function () {
+        let reg=/^\s*$/;
+        if(reg.test(username.value)||reg.test(userTel.value)) return;
+        if(customId){
+            ajax({
+              type:"post",
+              url:"/updateInfo",
+              data:{id:customId,name:username.value,tel:userTel.value},
+              dataType:"json",
+              success(result){
+                  if(result.code==0){
+                      alert(result.msg);
+                      username.value = userTel.value = "";
+                      window.location.href  ="/";
+                  }
+              }
+            })
+        }else{
+            ajax({
+                type:"post",
+                url:"/addInfo",
+                dataType:"json",
+                data:{name:username.value,tel:userTel.value},
+                success:function (result) {
+                    if(result.code==0){
+                        alert(result.msg);
+                        username.value=userTel.value="";
+                        window.location.href="/";
+                    }
+                }
+            })
+        }
+
+    }
+</script>

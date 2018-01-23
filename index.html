@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+<div class="box">
+    <a href="/add.html" class="add">CRM增加新客户</a>
+    <div class="head">
+        <span>编号</span>
+        <span>姓名</span>
+        <span>电话</span>
+        <span>操作</span>
+    </div>
+    <ul class="list" id="list">
+        <!--<li>
+            <span>1</span>
+            <span>小王</span>
+            <span>155182930</span>
+            <span><a href="">修改</a><a href="">删除</a></span>
+        </li>-->
+
+    </ul>
+</div>
+</body>
+</html>
+<script src="js/ajax.js"></script>
+<script>
+    let oUl = document.getElementById("list");
+    ajax({
+        type: "get",
+        url: "/getList",
+        dataType: "json",
+        success(result) {
+            if (result.code == 0) {
+                let str = '';
+                let data = result.data;
+                data.forEach(function (item, index) {
+                    str += `<li>
+                <span>${item.id}</span>
+                <span>${item.name}</span>
+                <span>${item.tel}</span>
+                <span><a href="/add.html?id=${item.id}">修改</a><a href="javascript:void(0)" class="removeUser" data-id="${item.id}">删除</a></span>
+                </li>`
+
+                });
+                oUl.innerHTML = str;
+            }
+        }
+    })
+
+    oUl.onclick = function(e){
+        e = e||window.event;
+        let target = e.target||e.srcElement;
+        if(target.className =="removeUser"){
+            let customId = target.dataset.id;
+            let flag = confirm("确定要删除吗?");
+            if(flag){
+                ajax({
+                    type:"delete",
+                    url:"/removeInfo",
+                    data:{id:customId},
+                    dataType:"json",
+                    success(result){
+                        if(result.code==0){
+                            alert(result.msg);
+                            oUl.removeChild(target.parentNode.parentNode);
+                        }
+                    }
+                })
+            }
+
+        }
+    }
+
+</script>
